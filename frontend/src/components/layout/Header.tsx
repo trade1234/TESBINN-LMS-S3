@@ -6,6 +6,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Logo from "./Logo";
@@ -54,6 +55,9 @@ const Header = () => {
       : role === "teacher"
       ? "/teacher/settings"
       : "/student/settings";
+  const handleLogout = () => {
+    authStorage.clearAll();
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-nav-footer shadow-md">
@@ -101,6 +105,8 @@ const Header = () => {
                   <DropdownMenuItem asChild>
                     <Link to={settingsPath}>Settings</Link>
                   </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={handleLogout}>Log out</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
@@ -185,6 +191,16 @@ const Header = () => {
                   >
                     Settings
                   </Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleLogout();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-foreground hover:border-primary/70 transition-colors"
+                  >
+                    Log out
+                  </button>
                 </div>
               ) : (
                 <>

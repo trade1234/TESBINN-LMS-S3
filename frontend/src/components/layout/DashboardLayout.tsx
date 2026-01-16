@@ -25,6 +25,13 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import Logo from "./Logo";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
@@ -90,6 +97,8 @@ const DashboardLayout = ({ role, children }: DashboardLayoutProps) => {
     .slice(0, 2)
     .toUpperCase();
   const firstName = displayName.split(" ")[0];
+  const dashboardPath = `/${role}`;
+  const coursesPath = role === "admin" ? "/admin/courses" : `/${role}/courses`;
   const settingsPath = `/${role}/settings`;
 
   useEffect(() => {
@@ -252,16 +261,31 @@ const DashboardLayout = ({ role, children }: DashboardLayoutProps) => {
               </Button>
 
               {/* User Menu */}
-              <Button variant="ghost" size="icon" asChild>
-                <Link to={settingsPath} title="Open profile settings">
-                  <Avatar className="h-9 w-9 cursor-pointer" title={displayName}>
-                    <AvatarImage src={profile?.profileImage || ""} />
-                    <AvatarFallback className="bg-secondary text-secondary-foreground text-sm">
-                      {avatarInitials || "JD"}
-                    </AvatarFallback>
-                  </Avatar>
-                </Link>
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" title="Open profile menu">
+                    <Avatar className="h-9 w-9 cursor-pointer" title={displayName}>
+                      <AvatarImage src={profile?.profileImage || ""} />
+                      <AvatarFallback className="bg-secondary text-secondary-foreground text-sm">
+                        {avatarInitials || "JD"}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-44">
+                  <DropdownMenuItem asChild>
+                    <Link to={dashboardPath}>Dashboard</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={coursesPath}>My Courses</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={settingsPath}>Settings</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={handleSignOut}>Log out</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </header>
