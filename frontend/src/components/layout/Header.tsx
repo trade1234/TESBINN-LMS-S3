@@ -2,6 +2,12 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, LogIn, UserPlus, UserCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import Logo from "./Logo";
 import { cn } from "@/lib/utils";
 import { authStorage, AUTH_CHANGE_EVENT, type AuthRole } from "@/lib/auth";
@@ -34,7 +40,15 @@ const Header = () => {
     return () => window.removeEventListener(AUTH_CHANGE_EVENT, handleAuthChange);
   }, []);
 
-  const profilePath =
+  const dashboardPath =
+    role === "admin" ? "/admin" : role === "teacher" ? "/teacher" : "/student";
+  const coursesPath =
+    role === "admin"
+      ? "/admin/courses"
+      : role === "teacher"
+      ? "/teacher/courses"
+      : "/student/courses";
+  const settingsPath =
     role === "admin"
       ? "/admin/settings"
       : role === "teacher"
@@ -67,13 +81,28 @@ const Header = () => {
           {/* Desktop Auth Buttons */}
           <div className="hidden lg:flex items-center gap-3">
             {isLoggedIn ? (
-              <Link
-                to={profilePath}
-                className="rounded-full border border-primary-foreground/20 p-2 text-primary-foreground transition-colors hover:border-primary-foreground"
-                aria-label="View profile"
-              >
-                <UserCircle2 className="h-5 w-5" />
-              </Link>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="rounded-full border border-primary-foreground/20 p-2 text-primary-foreground transition-colors hover:border-primary-foreground"
+                    aria-label="Open profile menu"
+                  >
+                    <UserCircle2 className="h-5 w-5" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-44">
+                  <DropdownMenuItem asChild>
+                    <Link to={dashboardPath}>Dashboard</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={coursesPath}>My Courses</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={settingsPath}>Settings</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <>
                 <Button
@@ -134,14 +163,29 @@ const Header = () => {
 
               <div className="pt-4 border-t border-border flex flex-col gap-3">
               {isLoggedIn ? (
-                <Link
-                  to={profilePath}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-foreground hover:border-primary/70 transition-colors"
-                >
-                  <UserCircle2 className="h-4 w-4" />
-                  <span>Profile</span>
-                </Link>
+                <div className="flex flex-col gap-2">
+                  <Link
+                    to={dashboardPath}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-foreground hover:border-primary/70 transition-colors"
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
+                    to={coursesPath}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-foreground hover:border-primary/70 transition-colors"
+                  >
+                    My Courses
+                  </Link>
+                  <Link
+                    to={settingsPath}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-foreground hover:border-primary/70 transition-colors"
+                  >
+                    Settings
+                  </Link>
+                </div>
               ) : (
                 <>
                   <Button variant="outline" asChild className="w-full">
