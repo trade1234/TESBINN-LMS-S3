@@ -36,7 +36,7 @@ import Logo from "./Logo";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
 import { authStorage } from "@/lib/auth";
-import type { MeResponse } from "@/lib/types";
+import type { ApiResponse, MeResponse, Notification } from "@/lib/types";
 
 interface NavItem {
   icon: React.ElementType;
@@ -76,6 +76,7 @@ const adminNav: NavItem[] = [
   { icon: GraduationCap, label: "Certificates", href: "/admin/certificates" },
   { icon: FolderOpen, label: "Categories", href: "/admin/categories" },
   { icon: Megaphone, label: "Adverts", href: "/admin/adverts" },
+  { icon: Bell, label: "Announcements", href: "/admin/announcements" },
   { icon: Calendar, label: "Schedules", href: "/admin/schedules" },
   { icon: BarChart3, label: "Analytics", href: "/admin/analytics" },
   { icon: Settings, label: "Settings", href: "/admin/settings" },
@@ -86,6 +87,10 @@ const DashboardLayout = ({ role, children }: DashboardLayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<MeResponse["data"] | null>(null);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const navItems = role === "admin" ? adminNav : role === "teacher" ? teacherNav : studentNav;
   const roleLabel = role.charAt(0).toUpperCase() + role.slice(1);
@@ -107,6 +112,7 @@ const DashboardLayout = ({ role, children }: DashboardLayoutProps) => {
       const token = authStorage.getToken();
       if (!token) {
         setProfile(null);
+        setUnreadCount(0);
         return;
       }
 
@@ -126,6 +132,100 @@ const DashboardLayout = ({ role, children }: DashboardLayoutProps) => {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    let active = true;
+    const loadUnreadCount = async () => {
+      const token = authStorage.getToken();
+      if (!token) {
+        if (active) setUnreadCount(0);
+        return;
+      }
+
+      try {
+        const res = await api.get<ApiResponse<{ unread: number }>>("/notifications/unread-count");
+        if (!active) return;
+        setUnreadCount(res.data.data?.unread || 0);
+      } catch (error) {
+        if (active) setUnreadCount(0);
+      }
+    };
+
+    loadUnreadCount();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const loadNotifications = async () => {
+    const token = authStorage.getToken();
+    if (!token) {
+      setNotifications([]);
+      return;
+    }
+
+    setNotificationsLoading(true);
+    try {
+      const res = await api.get<{
+        success: boolean;
+        data: Notification[];
+      }>("/notifications/me?limit=8");
+      setNotifications(res.data.data || []);
+    } catch (error) {
+      setNotifications([]);
+    } finally {
+      setNotificationsLoading(false);
+    }
+  };
+
+  const refreshUnreadCount = async () => {
+    try {
+      const res = await api.get<ApiResponse<{ unread: number }>>("/notifications/unread-count");
+      setUnreadCount(res.data.data?.unread || 0);
+    } catch (error) {
+      setUnreadCount(0);
+    }
+  };
+
+  const markNotificationRead = async (notificationId: string) => {
+    try {
+      await api.put(`/notifications/${notificationId}/read`);
+      setNotifications((prev) =>
+        prev.map((item) =>
+          item._id === notificationId ? { ...item, readAt: new Date().toISOString() } : item,
+        ),
+      );
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+    } catch (error) {
+      // Ignore failures for now.
+    }
+  };
+
+  const markAllNotificationsRead = async () => {
+    try {
+      await api.put("/notifications/read-all");
+      setNotifications((prev) =>
+        prev.map((item) => ({ ...item, readAt: item.readAt || new Date().toISOString() })),
+      );
+      setUnreadCount(0);
+    } catch (error) {
+      // Ignore failures for now.
+    }
+  };
+
+  useEffect(() => {
+    if (!notificationsOpen) return;
+    loadNotifications();
+  }, [notificationsOpen]);
+
+  const handleNotificationClick = async (notification: Notification) => {
+    if (!notification.readAt) {
+      await markNotificationRead(notification._id);
+    }
+    if (notification.link) {
+      navigate(notification.link);
+    }
+  };
 
   const handleSignOut = () => {
     authStorage.clearAll();
@@ -255,10 +355,78 @@ const DashboardLayout = ({ role, children }: DashboardLayoutProps) => {
               </Button>
 
               {/* Notifications */}
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5" />
-                <span className="absolute top-1 right-1 h-2 w-2 bg-destructive rounded-full" />
-              </Button>
+              <DropdownMenu onOpenChange={setNotificationsOpen}>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="relative">
+                    <Bell className="h-5 w-5" />
+                    {unreadCount > 0 && (
+                      <span className="absolute top-1 right-1 h-2 w-2 bg-destructive rounded-full" />
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-80 p-0">
+                  <div className="border-b border-border px-4 py-3 flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-semibold">Notifications</p>
+                      <p className="text-xs text-muted-foreground">
+                        {unreadCount ? `${unreadCount} unread` : "All caught up"}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2 text-xs"
+                        onClick={refreshUnreadCount}
+                      >
+                        Refresh
+                      </Button>
+                      {unreadCount > 0 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-xs"
+                          onClick={markAllNotificationsRead}
+                        >
+                          Mark all read
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="max-h-80 overflow-y-auto">
+                    {notificationsLoading ? (
+                      <p className="px-4 py-3 text-sm text-muted-foreground">
+                        Loading notifications...
+                      </p>
+                    ) : notifications.length ? (
+                      notifications.map((notification) => (
+                        <button
+                          key={notification._id}
+                          onClick={() => handleNotificationClick(notification)}
+                          className={cn(
+                            "w-full text-left px-4 py-3 border-b border-border/60 hover:bg-muted/60 transition-colors",
+                            notification.readAt ? "bg-background" : "bg-muted/30",
+                          )}
+                        >
+                          <p className="text-sm font-medium">{notification.title}</p>
+                          <p className="text-xs text-muted-foreground line-clamp-2">
+                            {notification.message}
+                          </p>
+                          <p className="text-[11px] text-muted-foreground mt-1">
+                            {notification.createdAt
+                              ? new Date(notification.createdAt).toLocaleString()
+                              : "Just now"}
+                          </p>
+                        </button>
+                      ))
+                    ) : (
+                      <p className="px-4 py-3 text-sm text-muted-foreground">
+                        No notifications yet.
+                      </p>
+                    )}
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
               {/* User Menu */}
               <DropdownMenu>

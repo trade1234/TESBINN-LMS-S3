@@ -1,6 +1,8 @@
 const Course = require('../models/Course');
+const User = require('../models/User');
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
+const { createNotificationForUser, createNotificationsForUsers } = require('../utils/notifications');
 
 const buildInstructorStats = (courses) => {
   const totals = courses.reduce(
@@ -153,6 +155,38 @@ exports.addCourse = asyncHandler(async (req, res, next) => {
 
   const course = await Course.create(req.body);
 
+  if (req.user.role === 'teacher') {
+    const teacher = await User.findById(req.user.id).select('name email preferences');
+    if (teacher) {
+      await createNotificationForUser(
+        teacher,
+        {
+          type: 'course_submitted',
+          title: 'Course submitted for approval',
+          message: `Your course "${course.title}" is awaiting admin review.`,
+          link: `/teacher/courses/${course._id}`,
+          meta: { courseId: course._id },
+        },
+        { preferenceKey: 'courseUpdates', sendEmail: true }
+      );
+    }
+
+    const admins = await User.find({ role: 'admin', status: 'active' }).select('name email preferences');
+    if (admins.length) {
+      await createNotificationsForUsers(
+        admins,
+        {
+          type: 'course_submitted',
+          title: 'Course awaiting approval',
+          message: `${teacher?.name || 'A teacher'} submitted "${course.title}" for review.`,
+          link: '/admin/courses',
+          meta: { courseId: course._id, teacherId: teacher?._id },
+        },
+        { preferenceKey: 'courseUpdates', sendEmail: true }
+      );
+    }
+  }
+
   res.status(201).json({
     success: true,
     data: course
@@ -239,6 +273,21 @@ exports.approveCourse = asyncHandler(async (req, res, next) => {
   course.rejectionReason = null;
   await course.save();
 
+  const teacher = await User.findById(course.teacher).select('name email preferences');
+  if (teacher) {
+    await createNotificationForUser(
+      teacher,
+      {
+        type: 'course_approved',
+        title: 'Course approved',
+        message: `Your course "${course.title}" is now live for students.`,
+        link: `/teacher/courses/${course._id}`,
+        meta: { courseId: course._id },
+      },
+      { preferenceKey: 'courseUpdates', sendEmail: true }
+    );
+  }
+
   res.status(200).json({
     success: true,
     data: course
@@ -295,6 +344,21 @@ exports.rejectCourse = asyncHandler(async (req, res, next) => {
     req.body && typeof req.body.reason === 'string' ? req.body.reason.trim() : '';
   course.rejectionReason = reason || 'Marked for revisions';
   await course.save();
+
+  const teacher = await User.findById(course.teacher).select('name email preferences');
+  if (teacher) {
+    await createNotificationForUser(
+      teacher,
+      {
+        type: 'course_rejected',
+        title: 'Course needs updates',
+        message: `Your course "${course.title}" was marked for revisions.`,
+        link: `/teacher/courses/${course._id}`,
+        meta: { courseId: course._id },
+      },
+      { preferenceKey: 'courseUpdates', sendEmail: true }
+    );
+  }
 
   res.status(200).json({
     success: true,

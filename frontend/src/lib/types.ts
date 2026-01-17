@@ -30,7 +30,7 @@ export interface Advert {
   order?: number;
   isActive?: boolean;
   createdAt?: string;
-
+}
 
 export interface Schedule {
   _id: string;
@@ -48,6 +48,38 @@ export interface Schedule {
   isActive?: boolean;
   createdAt?: string;
 }
+
+export interface Announcement {
+  _id: string;
+  title: string;
+  message: string;
+  audience: "all" | "students" | "teachers" | "admins";
+  createdBy?: {
+    _id?: string;
+    name?: string;
+    email?: string;
+  };
+  expiresAt?: string | null;
+  createdAt?: string;
+}
+
+export interface Notification {
+  _id: string;
+  type:
+    | "enrollment_requested"
+    | "enrollment_pending_review"
+    | "enrollment_approved"
+    | "enrollment_rejected"
+    | "course_submitted"
+    | "course_approved"
+    | "course_rejected"
+    | "announcement";
+  title: string;
+  message: string;
+  link?: string;
+  readAt?: string | null;
+  createdAt?: string;
+  meta?: Record<string, unknown>;
 }
 
 export interface ApiResponse<T> {

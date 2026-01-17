@@ -620,9 +620,11 @@ const StudentCoursePlayer = () => {
 
     if (lesson.lessonType === "video" && lesson.videoUrl) {
       const embedUrl = resolveVideoEmbedUrl(lesson.videoUrl);
-      const wrapperClass = `rounded-2xl overflow-hidden shadow-xl border border-border bg-black ${
-        fullscreen ? "w-full max-h-[80vh] aspect-video" : minimized ? "h-28 md:h-32" : "aspect-video"
-      } ${canOpenFullscreen ? "cursor-pointer" : ""}`;
+      const wrapperClass = fullscreen
+        ? `w-full h-full max-h-full bg-black ${canOpenFullscreen ? "cursor-pointer" : ""}`
+        : `mb-5 rounded-2xl overflow-hidden shadow-xl border border-border bg-black ${
+            minimized ? "h-28 md:h-32" : "aspect-video"
+          } ${canOpenFullscreen ? "cursor-pointer" : ""}`;
       if (embedUrl?.includes("youtube.com/embed")) {
         return (
           <div className={wrapperClass} onClick={handleOpenFullscreen}>
@@ -651,11 +653,13 @@ const StudentCoursePlayer = () => {
       );
     }
     if (lesson.lessonType === "image" && lesson.imageUrl) {
-      const imageClass = `rounded-2xl overflow-hidden border border-border bg-background flex items-center justify-center ${
-        fullscreen ? "w-full" : minimized ? "h-28 md:h-32" : ""
-      } ${canOpenFullscreen ? "cursor-pointer" : ""}`;
+      const imageClass = fullscreen
+        ? `w-full h-full max-h-full bg-black ${canOpenFullscreen ? "cursor-pointer" : ""}`
+        : `mb-5 rounded-2xl overflow-hidden border border-border bg-background flex items-center justify-center ${
+            minimized ? "h-28 md:h-32" : ""
+          } ${canOpenFullscreen ? "cursor-pointer" : ""}`;
       const imgClass = fullscreen
-        ? "max-h-[80vh] max-w-[80vw] w-full h-auto object-contain"
+        ? "w-full h-full max-h-full max-w-full object-contain"
         : `w-full object-contain ${minimized ? "h-full" : "h-72"}`;
       return (
         <div className={imageClass} onClick={handleOpenFullscreen}>
@@ -669,9 +673,11 @@ const StudentCoursePlayer = () => {
       );
     }
     if (lesson.lessonType === "pdf" && lesson.documentUrl) {
-      const pdfClass = `rounded-2xl overflow-hidden border border-border bg-background ${
-        fullscreen ? "h-[80vh] w-full" : minimized ? "h-28 md:h-32" : "h-[600px]"
-      } ${canOpenFullscreen ? "cursor-pointer" : ""}`;
+      const pdfClass = fullscreen
+        ? `w-full h-full max-h-full bg-background ${canOpenFullscreen ? "cursor-pointer" : ""}`
+        : `mb-5 rounded-2xl overflow-hidden border border-border bg-background ${
+            minimized ? "h-28 md:h-32" : "h-[600px]"
+          } ${canOpenFullscreen ? "cursor-pointer" : ""}`;
       return (
         <div className={pdfClass} onClick={handleOpenFullscreen}>
           <iframe
@@ -1155,7 +1161,32 @@ const StudentCoursePlayer = () => {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-sm font-semibold text-muted-foreground">Lesson player</p>
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          className="text-xs px-3"
+                          disabled={!prevSequenceEntry}
+                          onClick={() =>
+                            prevSequenceEntry &&
+                            handleSelectLesson(
+                              prevSequenceEntry.module._id,
+                              prevSequenceEntry.lesson._id,
+                            )
+                          }
+                        >
+                          Previous lesson
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          className="text-xs px-3"
+                          disabled={!nextSequenceEntry}
+                          onClick={() =>
+                            nextSequenceEntry &&
+                            handleNextLesson(nextSequenceEntry)
+                          }
+                        >
+                          Next lesson
+                        </Button>
                         <Button
                           variant="ghost"
                           className="text-xs px-3"
@@ -1229,29 +1260,6 @@ const StudentCoursePlayer = () => {
                     </Button>
                   </div>
                   <div className="flex flex-wrap gap-3 pt-2">
-                    <Button
-                      variant="ghost"
-                      disabled={!prevSequenceEntry}
-                      onClick={() =>
-                        prevSequenceEntry &&
-                        handleSelectLesson(
-                          prevSequenceEntry.module._id,
-                          prevSequenceEntry.lesson._id,
-                        )
-                      }
-                    >
-                      Previous lesson
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      disabled={!nextSequenceEntry}
-                      onClick={() =>
-                        nextSequenceEntry &&
-                        handleNextLesson(nextSequenceEntry)
-                      }
-                    >
-                      Next lesson
-                    </Button>
                     {isLastLessonInModule &&
                       isCurrentModuleQuizRequired &&
                       !isCurrentModuleQuizPassed && (
@@ -1436,8 +1444,8 @@ const StudentCoursePlayer = () => {
                 {currentLessonEntry?.lesson.lessonType === "pdf" &&
                   renderPdfDownload(currentLessonEntry.lesson)}
               </div>
-              <div className="flex-1 flex flex-col items-center justify-center px-4 py-6">
-                <div className="w-full">
+              <div className="flex-1 min-h-0 w-full px-2 sm:px-4">
+                <div className="w-full h-full min-h-0">
                   {currentLessonEntry &&
                     renderLessonMedia(currentLessonEntry.lesson, {
                       fullscreen: true,
@@ -1455,7 +1463,27 @@ const StudentCoursePlayer = () => {
                 >
                   Resume lesson
                 </Button>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    variant="ghost"
+                    disabled={!prevSequenceEntry}
+                    onClick={() =>
+                      prevSequenceEntry &&
+                      handleSelectLesson(prevSequenceEntry.module._id, prevSequenceEntry.lesson._id)
+                    }
+                  >
+                    Previous lesson
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    disabled={!nextSequenceEntry}
+                    onClick={() =>
+                      nextSequenceEntry &&
+                      handleNextLesson(nextSequenceEntry)
+                    }
+                  >
+                    Next lesson
+                  </Button>
                   {isLastLessonInModule &&
                     isCurrentModuleQuizRequired &&
                     !isCurrentModuleQuizPassed && (
@@ -1487,26 +1515,6 @@ const StudentCoursePlayer = () => {
                         Next Module - First Lesson
                       </Button>
                     )}
-                  <Button
-                    variant="ghost"
-                    disabled={!prevSequenceEntry}
-                    onClick={() =>
-                      prevSequenceEntry &&
-                      handleSelectLesson(prevSequenceEntry.module._id, prevSequenceEntry.lesson._id)
-                    }
-                  >
-                    Previous lesson
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    disabled={!nextSequenceEntry}
-                    onClick={() =>
-                      nextSequenceEntry &&
-                      handleNextLesson(nextSequenceEntry)
-                    }
-                  >
-                    Next lesson
-                  </Button>
                 </div>
               </div>
             </>

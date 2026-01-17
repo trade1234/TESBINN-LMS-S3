@@ -31,6 +31,7 @@ import AdminCategories from "./pages/admin/Categories";
 import AdminAnalytics from "./pages/admin/Analytics";
 import AdminSettings from "./pages/admin/Settings";
 import AdminAdverts from "./pages/admin/Adverts";
+import AdminAnnouncements from "./pages/admin/Announcements";
 import AdminCertificates from "./pages/admin/Certificates";
 import AdminSchedules from "./pages/admin/Schedules";
 import NotFound from "./pages/NotFound";
@@ -82,6 +83,7 @@ const App = () => (
           <Route path="/admin/courses" element={<AdminCourses />} />
           <Route path="/admin/categories" element={<AdminCategories />} />
           <Route path="/admin/adverts" element={<AdminAdverts />} />
+          <Route path="/admin/announcements" element={<AdminAnnouncements />} />
           <Route path="/admin/analytics" element={<AdminAnalytics />} />
           <Route path="/admin/certificates" element={<AdminCertificates />} />
           <Route path="/admin/schedules" element={<AdminSchedules />} />

@@ -125,6 +125,18 @@ const UserSchema = new mongoose.Schema({
       productUpdates: {
         type: Boolean,
         default: false
+      },
+      enrollmentUpdates: {
+        type: Boolean,
+        default: true
+      },
+      courseUpdates: {
+        type: Boolean,
+        default: true
+      },
+      adminAnnouncements: {
+        type: Boolean,
+        default: true
       }
     },
     learning: {

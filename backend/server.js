@@ -25,6 +25,8 @@ const files = require('./routes/files');
 const certificates = require('./routes/certificates');
 const adverts = require('./routes/adverts');
 const schedules = require('./routes/schedules');
+const notifications = require('./routes/notifications');
+const announcements = require('./routes/announcements');
 
 const app = express();
 
@@ -82,6 +84,8 @@ app.use('/api/v1/files', files);
 app.use('/api/v1/certificates', certificates);
 app.use('/api/v1/adverts', adverts);
 app.use('/api/v1/schedules', schedules);
+app.use('/api/v1/notifications', notifications);
+app.use('/api/v1/announcements', announcements);
 
 app.use(errorHandler);
 

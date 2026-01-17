@@ -5,6 +5,7 @@ const User = require('../models/User');
 const crypto = require('crypto');
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
+const { createNotificationForUser, createNotificationsForUsers } = require('../utils/notifications');
 
 const calculatePercent = (course, enrollment) => {
   const lessonKeys = new Set();
@@ -99,12 +100,14 @@ exports.enrollInCourse = asyncHandler(async (req, res, next) => {
   }
 
   const existing = await Enrollment.findOne({ student: req.user.id, course: courseId });
+  let shouldNotify = false;
   if (existing) {
     if (!existing.approvalStatus || existing.approvalStatus === 'approved') {
       return next(new ErrorResponse('Already enrolled in this course', 400));
     }
 
     if (existing.approvalStatus === 'rejected') {
+      shouldNotify = true;
       existing.approvalStatus = 'pending';
       existing.rejectionReason = undefined;
       existing.reviewedBy = undefined;
@@ -113,6 +116,50 @@ exports.enrollInCourse = asyncHandler(async (req, res, next) => {
       existing.percentComplete = 0;
       existing.completionStatus = 'not_started';
       await existing.save();
+    }
+
+    if (shouldNotify) {
+      const [student, teacher, admins] = await Promise.all([
+        User.findById(req.user.id).select('name email preferences'),
+        User.findById(course.teacher).select('name email preferences'),
+        User.find({ role: 'admin', status: 'active' }).select('name email preferences'),
+      ]);
+
+      await createNotificationForUser(
+        student,
+        {
+          type: 'enrollment_requested',
+          title: 'Enrollment request sent',
+          message: `Your request to enroll in "${course.title}" is pending approval.`,
+          link: '/student/courses',
+          meta: { courseId: course._id, enrollmentId: existing._id },
+        },
+        { preferenceKey: 'enrollmentUpdates', sendEmail: true }
+      );
+
+      await createNotificationsForUsers(
+        admins,
+        {
+          type: 'enrollment_pending_review',
+          title: 'Enrollment requires review',
+          message: `${student?.name || 'A student'} requested access to "${course.title}".`,
+          link: '/admin/approvals',
+          meta: { courseId: course._id, enrollmentId: existing._id },
+        },
+        { preferenceKey: 'enrollmentUpdates', sendEmail: true }
+      );
+
+      await createNotificationForUser(
+        teacher,
+        {
+          type: 'enrollment_pending_review',
+          title: 'New enrollment request',
+          message: `${student?.name || 'A student'} requested access to "${course.title}".`,
+          link: `/teacher/courses/${course._id}`,
+          meta: { courseId: course._id, enrollmentId: existing._id },
+        },
+        { preferenceKey: 'enrollmentUpdates', sendEmail: true }
+      );
     }
 
     return res.status(200).json({ success: true, data: existing });
@@ -125,12 +172,58 @@ exports.enrollInCourse = asyncHandler(async (req, res, next) => {
     approvalStatus: 'pending',
   });
 
+  const [student, teacher, admins] = await Promise.all([
+    User.findById(req.user.id).select('name email preferences'),
+    User.findById(course.teacher).select('name email preferences'),
+    User.find({ role: 'admin', status: 'active' }).select('name email preferences'),
+  ]);
+
+  await createNotificationForUser(
+    student,
+    {
+      type: 'enrollment_requested',
+      title: 'Enrollment request sent',
+      message: `Your request to enroll in "${course.title}" is pending approval.`,
+      link: '/student/courses',
+      meta: { courseId: course._id, enrollmentId: enrollment._id },
+    },
+    { preferenceKey: 'enrollmentUpdates', sendEmail: true }
+  );
+
+  await createNotificationsForUsers(
+    admins,
+    {
+      type: 'enrollment_pending_review',
+      title: 'Enrollment requires review',
+      message: `${student?.name || 'A student'} requested access to "${course.title}".`,
+      link: '/admin/approvals',
+      meta: { courseId: course._id, enrollmentId: enrollment._id },
+    },
+    { preferenceKey: 'enrollmentUpdates', sendEmail: true }
+  );
+
+  await createNotificationForUser(
+    teacher,
+    {
+      type: 'enrollment_pending_review',
+      title: 'New enrollment request',
+      message: `${student?.name || 'A student'} requested access to "${course.title}".`,
+      link: `/teacher/courses/${course._id}`,
+      meta: { courseId: course._id, enrollmentId: enrollment._id },
+    },
+    { preferenceKey: 'enrollmentUpdates', sendEmail: true }
+  );
+
   res.status(201).json({ success: true, data: enrollment });
 });
 
 exports.getMyEnrollments = asyncHandler(async (req, res, next) => {
   const enrollments = await Enrollment.find({ student: req.user.id })
-    .populate({ path: 'course', select: 'title description category imageUrl teacher isPublished isApproved' });
+    .populate({
+      path: 'course',
+      select: 'title description category imageUrl teacher isPublished isApproved duration totalEnrollments averageRating price modules',
+      populate: { path: 'teacher', select: 'name profileImage' },
+    });
 
   res.status(200).json({ success: true, count: enrollments.length, data: enrollments });
 });
@@ -309,6 +402,7 @@ exports.reviewEnrollment = asyncHandler(async (req, res, next) => {
   }
 
   const wasApproved = enrollment.approvalStatus === 'approved';
+  const wasRejected = enrollment.approvalStatus === 'rejected';
   const hadRating = Number.isFinite(enrollment.rating);
   enrollment.approvalStatus = status;
   enrollment.reviewedBy = req.user.id;
@@ -338,6 +432,50 @@ exports.reviewEnrollment = asyncHandler(async (req, res, next) => {
   }
   if (status === 'rejected' && hadRating) {
     await Course.getAverageRating(enrollment.course);
+  }
+
+  const [student, course] = await Promise.all([
+    User.findById(enrollment.student).select('name email preferences'),
+    Course.findById(enrollment.course).select('title teacher'),
+  ]);
+  const teacher = course ? await User.findById(course.teacher).select('name email preferences') : null;
+
+  if (status === 'approved' && !wasApproved) {
+    await createNotificationForUser(
+      student,
+      {
+        type: 'enrollment_approved',
+        title: 'Enrollment approved',
+        message: `You can now access "${course?.title || 'this course'}".`,
+        link: '/student/courses',
+        meta: { courseId: course?._id, enrollmentId: enrollment._id },
+      },
+      { preferenceKey: 'enrollmentUpdates', sendEmail: true }
+    );
+
+    await createNotificationForUser(
+      teacher,
+      {
+        type: 'enrollment_approved',
+        title: 'Student approved',
+        message: `${student?.name || 'A student'} was approved for "${course?.title || 'your course'}".`,
+        link: `/teacher/courses/${course?._id}`,
+        meta: { courseId: course?._id, enrollmentId: enrollment._id },
+      },
+      { preferenceKey: 'enrollmentUpdates', sendEmail: true }
+    );
+  } else if (status === 'rejected' && !wasRejected) {
+    await createNotificationForUser(
+      student,
+      {
+        type: 'enrollment_rejected',
+        title: 'Enrollment rejected',
+        message: rejectionReason || 'Your enrollment request was not approved.',
+        link: '/student/courses',
+        meta: { courseId: course?._id, enrollmentId: enrollment._id },
+      },
+      { preferenceKey: 'enrollmentUpdates', sendEmail: true }
+    );
   }
 
   res.status(200).json({ success: true, data: enrollment });
