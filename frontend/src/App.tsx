@@ -23,6 +23,7 @@ import TeacherDashboard from "./pages/teacher/TeacherDashboard";
 import TeacherCourses from "./pages/teacher/TeacherCourses";
 import TeacherCourseEdit from "./pages/teacher/TeacherCourseEdit";
 import TeacherModules from "./pages/teacher/ModulesLessons";
+import TeacherSettings from "./pages/teacher/TeacherSettings";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminApprovals from "./pages/admin/Approvals";
 import AdminUsers from "./pages/admin/Users";
@@ -73,7 +74,7 @@ const App = () => (
           <Route path="/teacher/courses/:courseId" element={<TeacherCourseEdit />} />
           <Route path="/teacher/students" element={<TeacherDashboard />} />
           <Route path="/teacher/analytics" element={<TeacherDashboard />} />
-          <Route path="/teacher/settings" element={<TeacherDashboard />} />
+          <Route path="/teacher/settings" element={<TeacherSettings />} />
           <Route path="/teacher/modules" element={<TeacherModules />} />
 
           {/* Admin Routes */}

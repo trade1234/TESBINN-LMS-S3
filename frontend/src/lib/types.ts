@@ -123,6 +123,9 @@ export interface MeResponse {
         courseReminders?: boolean;
         mentorMessages?: boolean;
         productUpdates?: boolean;
+        enrollmentUpdates?: boolean;
+        courseUpdates?: boolean;
+        adminAnnouncements?: boolean;
       };
       learning?: {
         weeklyStudyGoalHours?: number;
