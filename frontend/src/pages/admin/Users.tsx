@@ -33,6 +33,16 @@ const AdminUsers = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [isCreateAdminOpen, setIsCreateAdminOpen] = useState(false);
+  const [adminForm, setAdminForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    phone: "",
+    location: "",
+  });
+  const [isCreatingAdmin, setIsCreatingAdmin] = useState(false);
 
   const userSections = [
     {
@@ -164,6 +174,86 @@ const AdminUsers = () => {
     setConfirmPassword("");
   };
 
+  const resetAdminForm = () => {
+    setAdminForm({
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      phone: "",
+      location: "",
+    });
+  };
+
+  const handleCreateAdmin = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!adminForm.name.trim() || !adminForm.email.trim() || !adminForm.password) {
+      toast({
+        title: "Missing details",
+        description: "Name, email, and password are required.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (adminForm.password.length < 6) {
+      toast({
+        title: "Password too short",
+        description: "Password must be at least 6 characters.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (adminForm.password !== adminForm.confirmPassword) {
+      toast({
+        title: "Passwords do not match",
+        description: "Double-check the confirmation password.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsCreatingAdmin(true);
+    try {
+      const response = await api.post<ApiResponse<User>>("/users/admin", {
+        name: adminForm.name.trim(),
+        email: adminForm.email.trim(),
+        password: adminForm.password,
+        phone: adminForm.phone.trim(),
+        location: adminForm.location.trim(),
+      });
+      setUsers((prev) => [response.data.data, ...prev]);
+      toast({
+        title: "Admin created",
+        description: `${response.data.data.name} now has admin access.`,
+      });
+      resetAdminForm();
+      setIsCreateAdminOpen(false);
+    } catch (err: any) {
+      const status = err?.response?.status;
+      const message =
+        err?.response?.data?.error ||
+        err?.response?.data?.message ||
+        "Failed to create admin.";
+
+      if (status === 401) {
+        authStorage.clearAll();
+        navigate("/login");
+        return;
+      }
+
+      toast({
+        title: "Unable to create admin",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsCreatingAdmin(false);
+    }
+  };
+
   const handlePasswordUpdate = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!selectedUserId) return;
@@ -279,7 +369,7 @@ const AdminUsers = () => {
               <Button variant="outline" size="sm">
                 Invite new teacher
               </Button>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => setIsCreateAdminOpen(true)}>
                 Grant admin access
               </Button>
               <Button variant="outline" size="sm">
@@ -452,6 +542,109 @@ const AdminUsers = () => {
                 </p>
               </div>
 
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="rounded-xl border border-border/70 p-4">
+                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                    Professional details
+                  </p>
+                  <div className="mt-3 space-y-2 text-sm">
+                    <p>
+                      <span className="text-muted-foreground">Current role:</span>{" "}
+                      {userForDetails.professional?.currentRole || "Not provided"}
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Company:</span>{" "}
+                      {userForDetails.professional?.company || "Not provided"}
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Focus:</span>{" "}
+                      {userForDetails.professional?.careerFocus || "Not provided"}
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Experience:</span>{" "}
+                      {userForDetails.professional?.experienceLevel || "Not provided"}
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Portfolio:</span>{" "}
+                      {userForDetails.professional?.portfolioUrl || "Not provided"}
+                    </p>
+                  </div>
+                </div>
+                <div className="rounded-xl border border-border/70 p-4">
+                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                    Goals & skills
+                  </p>
+                  <div className="mt-3 space-y-2 text-sm">
+                    <p className="text-muted-foreground">
+                      {userForDetails.professional?.careerGoals || "No goals shared."}
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Skills:</span>{" "}
+                      {userForDetails.professional?.skills?.length
+                        ? userForDetails.professional.skills.join(", ")
+                        : "None listed"}
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Open to opportunities:</span>{" "}
+                      {userForDetails.professional?.openToOpportunities ? "Yes" : "No"}
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Available to mentor:</span>{" "}
+                      {userForDetails.professional?.availableForMentorship ? "Yes" : "No"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="rounded-xl border border-border/70 p-4">
+                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                    Notification preferences
+                  </p>
+                  <div className="mt-3 space-y-2 text-sm">
+                    <p>
+                      <span className="text-muted-foreground">Enrollment updates:</span>{" "}
+                      {userForDetails.preferences?.notifications?.enrollmentUpdates ? "On" : "Off"}
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Course updates:</span>{" "}
+                      {userForDetails.preferences?.notifications?.courseUpdates ? "On" : "Off"}
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Admin announcements:</span>{" "}
+                      {userForDetails.preferences?.notifications?.adminAnnouncements ? "On" : "Off"}
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Course reminders:</span>{" "}
+                      {userForDetails.preferences?.notifications?.courseReminders ? "On" : "Off"}
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Mentor messages:</span>{" "}
+                      {userForDetails.preferences?.notifications?.mentorMessages ? "On" : "Off"}
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Product updates:</span>{" "}
+                      {userForDetails.preferences?.notifications?.productUpdates ? "On" : "Off"}
+                    </p>
+                  </div>
+                </div>
+                <div className="rounded-xl border border-border/70 p-4">
+                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                    Security settings
+                  </p>
+                  <div className="mt-3 space-y-2 text-sm">
+                    <p>
+                      <span className="text-muted-foreground">MFA enabled:</span>{" "}
+                      {userForDetails.security?.mfaEnabled ? "Yes" : "No"}
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">New device alerts:</span>{" "}
+                      {userForDetails.security?.newDeviceAlerts ? "On" : "Off"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <div className="rounded-xl border border-border/70 p-4">
                 <div className="flex items-center gap-2">
                   <KeyRound className="h-4 w-4 text-primary" />
@@ -489,6 +682,96 @@ const AdminUsers = () => {
           ) : (
             <p className="text-sm text-muted-foreground">Select a user to view details.</p>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={isCreateAdminOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setIsCreateAdminOpen(false);
+            resetAdminForm();
+          }
+        }}
+      >
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Grant admin access</DialogTitle>
+            <DialogDescription>
+              Create a new admin account with full platform permissions.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form className="space-y-4" onSubmit={handleCreateAdmin}>
+            <div className="space-y-2">
+              <Label htmlFor="admin-name">Full name</Label>
+              <Input
+                id="admin-name"
+                value={adminForm.name}
+                onChange={(event) => setAdminForm((prev) => ({ ...prev, name: event.target.value }))}
+                placeholder="Admin name"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="admin-email">Email</Label>
+              <Input
+                id="admin-email"
+                type="email"
+                value={adminForm.email}
+                onChange={(event) => setAdminForm((prev) => ({ ...prev, email: event.target.value }))}
+                placeholder="admin@example.com"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="admin-phone">Phone (optional)</Label>
+              <Input
+                id="admin-phone"
+                value={adminForm.phone}
+                onChange={(event) => setAdminForm((prev) => ({ ...prev, phone: event.target.value }))}
+                placeholder="+1 555 123 4567"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="admin-location">Location (optional)</Label>
+              <Input
+                id="admin-location"
+                value={adminForm.location}
+                onChange={(event) => setAdminForm((prev) => ({ ...prev, location: event.target.value }))}
+                placeholder="City, Country"
+              />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="admin-password">Temporary password</Label>
+                <Input
+                  id="admin-password"
+                  type="password"
+                  value={adminForm.password}
+                  onChange={(event) => setAdminForm((prev) => ({ ...prev, password: event.target.value }))}
+                  placeholder="Minimum 6 characters"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="admin-confirm">Confirm password</Label>
+                <Input
+                  id="admin-confirm"
+                  type="password"
+                  value={adminForm.confirmPassword}
+                  onChange={(event) =>
+                    setAdminForm((prev) => ({ ...prev, confirmPassword: event.target.value }))
+                  }
+                />
+              </div>
+            </div>
+            <DialogFooter className="gap-2 sm:justify-end">
+              <Button type="button" variant="outline" onClick={() => setIsCreateAdminOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isCreatingAdmin}>
+                {isCreatingAdmin ? "Creating..." : "Create admin"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </DashboardLayout>

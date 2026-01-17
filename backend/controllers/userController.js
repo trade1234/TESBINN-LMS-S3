@@ -77,3 +77,29 @@ exports.updateUserPassword = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({ success: true, data: sanitizedUser });
 });
+
+exports.createAdminUser = asyncHandler(async (req, res, next) => {
+  const { name, email, password, phone, location } = req.body || {};
+
+  if (!name || !email || !password) {
+    return next(new ErrorResponse('Name, email, and password are required', 400));
+  }
+
+  if (String(password).length < 6) {
+    return next(new ErrorResponse('Password must be at least 6 characters', 400));
+  }
+
+  const user = await User.create({
+    name: String(name).trim(),
+    email: String(email).trim(),
+    password: String(password),
+    phone: typeof phone === 'string' ? phone.trim() : undefined,
+    location: typeof location === 'string' ? location.trim() : undefined,
+    role: 'admin',
+    status: 'active',
+  });
+
+  const sanitizedUser = await User.findById(user._id).select('-__v');
+
+  res.status(201).json({ success: true, data: sanitizedUser });
+});
