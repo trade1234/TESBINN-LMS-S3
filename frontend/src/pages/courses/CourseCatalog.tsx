@@ -97,13 +97,13 @@ const CourseCatalog = () => {
 
       <main className="pt-20 lg:pt-24">
         {/* Hero Section */}
-        <section className="bg-gradient-hero text-primary-foreground py-16 lg:py-24">
+        <section className="bg-gradient-hero text-foreground py-16 lg:py-24">
           <div className="container-wide section-padding">
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="text-3xl lg:text-5xl font-bold mb-4">
                 Explore Our Courses
               </h1>
-              <p className="text-lg text-primary-foreground/80 mb-8">
+              <p className="text-lg text-muted-foreground mb-8">
                 Discover hundreds of courses taught by industry experts. 
                 Find the perfect course to advance your career.
               </p>

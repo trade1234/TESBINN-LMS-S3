@@ -273,3 +273,57 @@ export interface StudentDashboardData {
   weeklyProgress: StudentDashboardProgressPoint[];
   recentActivity: StudentDashboardActivity[];
 }
+
+export interface AdminAnalyticsSeriesPoint {
+  date: string;
+  value: number;
+}
+
+export interface AdminAnalyticsCourse {
+  id: string;
+  title: string;
+  category?: CourseCategory;
+  enrollments: number;
+  revenue: number;
+}
+
+export interface AdminAnalyticsActivity {
+  id: string;
+  type: "user" | "enrollment" | "completion" | "certificate" | "course";
+  title: string;
+  description: string;
+  createdAt: string;
+}
+
+export interface AdminAnalyticsData {
+  range: {
+    start: string;
+    end: string;
+    label: string;
+    days: number;
+  };
+  summary: {
+    totalUsers: number;
+    totalCourses: number;
+    activeCourses: number;
+    newUsers: number;
+    newEnrollments: number;
+    pendingEnrollments: number;
+    completedCourses: number;
+    activeLearners: number;
+    revenue: number;
+  };
+  deltas: {
+    activeLearners: number;
+    newUsers: number;
+    newEnrollments: number;
+    revenue: number;
+  };
+  series: {
+    userGrowth: AdminAnalyticsSeriesPoint[];
+    enrollments: AdminAnalyticsSeriesPoint[];
+    revenue: AdminAnalyticsSeriesPoint[];
+  };
+  topCourses: AdminAnalyticsCourse[];
+  recentActivity: AdminAnalyticsActivity[];
+}
