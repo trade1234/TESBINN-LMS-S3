@@ -22,6 +22,7 @@ import {
   Megaphone,
   Award,
   Calendar,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -77,6 +78,7 @@ const adminNav: NavItem[] = [
   { icon: FolderOpen, label: "Categories", href: "/admin/categories" },
   { icon: Megaphone, label: "Adverts", href: "/admin/adverts" },
   { icon: Bell, label: "Announcements", href: "/admin/announcements" },
+  { icon: FileText, label: "Blog", href: "/admin/blog" },
   { icon: Calendar, label: "Schedules", href: "/admin/schedules" },
   { icon: BarChart3, label: "Analytics", href: "/admin/analytics" },
   { icon: Settings, label: "Settings", href: "/admin/settings" },

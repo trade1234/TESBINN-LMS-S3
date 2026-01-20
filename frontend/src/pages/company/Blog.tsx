@@ -1,54 +1,59 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Calendar, Tag } from "lucide-react";
+import { Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import { api } from "@/lib/api";
+import type { ApiResponse, BlogPost } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
-
-const posts = [
-  {
-    id: "future-learning",
-    title: "Building practical learning paths for modern teams",
-    category: "Learning",
-    date: "2024-06-01",
-    excerpt:
-      "How TESBINN structures programs to help learners apply new skills in their day-to-day roles.",
-  },
-  {
-    id: "digital-growth",
-    title: "Digital growth playbooks for new businesses",
-    category: "Business",
-    date: "2024-05-22",
-    excerpt:
-      "A look at the frameworks we teach to help entrepreneurs build sustainable demand pipelines.",
-  },
-  {
-    id: "certification",
-    title: "Why certification matters for workforce readiness",
-    category: "Certification",
-    date: "2024-05-10",
-    excerpt:
-      "Certification builds trust and accountability. Here is how we design ours.",
-  },
-  {
-    id: "platform",
-    title: "Inside the TESBINN platform roadmap",
-    category: "Platform",
-    date: "2024-04-30",
-    excerpt:
-      "Upcoming tools for instructors, learners, and enterprise partners.",
-  },
-];
 
 const Blog = () => {
   const { toast } = useToast();
+  const [posts, setPosts] = useState<BlogPost[]>([]);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("all");
   const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const categories = ["all", "Learning", "Business", "Certification", "Platform"];
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const res = await api.get<ApiResponse<BlogPost[]>>("/blog");
+        if (!active) return;
+        setPosts(res.data.data || []);
+      } catch (err: any) {
+        if (!active) return;
+        const message =
+          err?.response?.data?.error ||
+          err?.response?.data?.message ||
+          "Failed to load blog posts.";
+        setError(message);
+      } finally {
+        if (active) setIsLoading(false);
+      }
+    };
+
+    load();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const categories = useMemo(() => {
+    const set = new Set(
+      posts
+        .map((post) => post.category)
+        .filter((value): value is string => Boolean(value))
+    );
+    return ["all", ...Array.from(set).sort((a, b) => a.localeCompare(b))];
+  }, [posts]);
 
   const filteredPosts = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -57,7 +62,7 @@ const Blog = () => {
       if (!normalized) return true;
       return post.title.toLowerCase().includes(normalized);
     });
-  }, [category, query]);
+  }, [category, posts, query]);
 
   const handleSubscribe = () => {
     if (!email.trim()) {
@@ -124,26 +129,45 @@ const Blog = () => {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              {filteredPosts.map((post) => (
-                <div key={post.id} className="rounded-2xl border border-border p-5 space-y-3">
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                    <span className="inline-flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      {new Date(post.date).toLocaleDateString()}
-                    </span>
-                    <span className="inline-flex items-center gap-2">
-                      <Tag className="h-4 w-4" />
-                      {post.category}
-                    </span>
+              {isLoading ? (
+                <p className="text-sm text-muted-foreground">Loading posts...</p>
+              ) : error ? (
+                <p className="text-sm text-destructive">{error}</p>
+              ) : (
+                filteredPosts.map((post) => (
+                  <div key={post._id} className="rounded-2xl border border-border p-5 space-y-3">
+                    {post.coverImage && (
+                      <img
+                        src={post.coverImage}
+                        alt={post.title}
+                        className="h-44 w-full rounded-xl object-cover"
+                      />
+                    )}
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <span className="inline-flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        {post.publishedAt
+                          ? new Date(post.publishedAt).toLocaleDateString()
+                          : post.createdAt
+                            ? new Date(post.createdAt).toLocaleDateString()
+                            : "-"}
+                      </span>
+                      {post.category && (
+                        <span className="inline-flex items-center gap-2">
+                          <Tag className="h-4 w-4" />
+                          {post.category}
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="text-lg font-semibold">{post.title}</h3>
+                    <p className="text-sm text-muted-foreground">{post.excerpt}</p>
+                    <Button variant="outline" size="sm" asChild>
+                      <Link to={`/blog/${post.slug}`}>Read article</Link>
+                    </Button>
                   </div>
-                  <h3 className="text-lg font-semibold">{post.title}</h3>
-                  <p className="text-sm text-muted-foreground">{post.excerpt}</p>
-                  <Button variant="outline" size="sm">
-                    Read article
-                  </Button>
-                </div>
-              ))}
-              {!filteredPosts.length && (
+                ))
+              )}
+              {!isLoading && !error && !filteredPosts.length && (
                 <p className="text-sm text-muted-foreground">No posts match your search.</p>
               )}
             </div>

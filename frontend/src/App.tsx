@@ -18,6 +18,7 @@ import About from "./pages/company/About";
 import Tesbinn from "./pages/company/Tesbinn";
 import Careers from "./pages/company/Careers";
 import Blog from "./pages/company/Blog";
+import BlogPostPage from "./pages/company/BlogPost";
 import Press from "./pages/company/Press";
 import StudentDashboard from "./pages/student/StudentDashboard";
 import StudentCoursePlayer from "./pages/student/StudentCoursePlayer";
@@ -40,6 +41,7 @@ import AdminAdverts from "./pages/admin/Adverts";
 import AdminAnnouncements from "./pages/admin/Announcements";
 import AdminCertificates from "./pages/admin/Certificates";
 import AdminSchedules from "./pages/admin/Schedules";
+import AdminBlog from "./pages/admin/Blog";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -66,6 +68,7 @@ const App = () => (
           <Route path="/tesbinn" element={<Tesbinn />} />
           <Route path="/careers" element={<Careers />} />
           <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPostPage />} />
           <Route path="/press" element={<Press />} />
 
           {/* Student Routes */}
@@ -95,6 +98,7 @@ const App = () => (
           <Route path="/admin/categories" element={<AdminCategories />} />
           <Route path="/admin/adverts" element={<AdminAdverts />} />
           <Route path="/admin/announcements" element={<AdminAnnouncements />} />
+          <Route path="/admin/blog" element={<AdminBlog />} />
           <Route path="/admin/analytics" element={<AdminAnalytics />} />
           <Route path="/admin/certificates" element={<AdminCertificates />} />
           <Route path="/admin/schedules" element={<AdminSchedules />} />

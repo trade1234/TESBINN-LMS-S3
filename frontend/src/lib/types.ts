@@ -327,3 +327,17 @@ export interface AdminAnalyticsData {
   topCourses: AdminAnalyticsCourse[];
   recentActivity: AdminAnalyticsActivity[];
 }
+
+export interface BlogPost {
+  _id: string;
+  title: string;
+  slug: string;
+  category?: string;
+  excerpt?: string;
+  content?: string;
+  coverImage?: string;
+  status?: "draft" | "published";
+  publishedAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}

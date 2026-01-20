@@ -29,6 +29,7 @@ const notifications = require('./routes/notifications');
 const announcements = require('./routes/announcements');
 const dashboard = require('./routes/dashboard');
 const analytics = require('./routes/analytics');
+const blog = require('./routes/blog');
 
 const app = express();
 
@@ -90,6 +91,7 @@ app.use('/api/v1/notifications', notifications);
 app.use('/api/v1/announcements', announcements);
 app.use('/api/v1/dashboard', dashboard);
 app.use('/api/v1/analytics', analytics);
+app.use('/api/v1/blog', blog);
 
 app.use(errorHandler);
 
