@@ -97,8 +97,16 @@ const CourseCatalog = () => {
 
       <main className="pt-20 lg:pt-24">
         {/* Hero Section */}
-        <section className="bg-gradient-hero text-foreground py-16 lg:py-24">
-          <div className="container-wide section-padding">
+        <section className="relative py-16 lg:py-24 overflow-hidden">
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{
+              backgroundImage:
+                "linear-gradient(120deg, rgba(255,255,255,0.96) 0%, rgba(248,250,252,0.9) 45%, rgba(255,255,255,0.85) 100%), url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1600&q=80')",
+            }}
+            aria-hidden="true"
+          />
+          <div className="container-wide section-padding relative z-10">
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="text-3xl lg:text-5xl font-bold mb-4">
                 Explore Our Courses

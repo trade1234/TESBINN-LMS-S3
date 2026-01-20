@@ -51,8 +51,16 @@ const SchedulePage = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <section className="pt-20 bg-hero">
-        <div className="container-wide section-padding py-12 lg:py-16">
+      <section className="pt-20 relative overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage:
+              "linear-gradient(120deg, rgba(255,255,255,0.96) 0%, rgba(248,250,252,0.9) 45%, rgba(255,255,255,0.85) 100%), url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1600&q=80')",
+          }}
+          aria-hidden="true"
+        />
+        <div className="container-wide section-padding py-12 lg:py-16 relative z-10">
           <div className="flex flex-col gap-4 text-center">
             <div className="flex items-center justify-center gap-2 text-primary">
               <CalendarDays className="h-6 w-6" />

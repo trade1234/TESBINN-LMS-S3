@@ -74,8 +74,16 @@ const Careers = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="pt-20">
-        <section className="bg-hero py-12 lg:py-16">
-          <div className="container-wide section-padding space-y-4 max-w-3xl">
+        <section className="relative py-12 lg:py-16 overflow-hidden">
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{
+              backgroundImage:
+                "linear-gradient(120deg, rgba(255,255,255,0.96) 0%, rgba(248,250,252,0.9) 45%, rgba(255,255,255,0.85) 100%), url('https://cloud.appwrite.io/v1/storage/buckets/68de2cd2000edc9d02c9/files/lesson-4f80e72498ff49918ef41e8ad932/view?project=66fa8216001614a2f7cd')",
+            }}
+            aria-hidden="true"
+          />
+          <div className="container-wide section-padding space-y-4 max-w-3xl relative z-10">
             <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Careers</p>
             <h1 className="text-3xl sm:text-4xl font-bold text-foreground">
               Build the future of learning with TESBINN
