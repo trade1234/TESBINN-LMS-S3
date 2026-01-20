@@ -14,6 +14,7 @@ const Footer = () => {
     ],
     company: [
       { label: "About TESBINN", href: "/about" },
+      { label: "TESBINN", href: "/tesbinn" },
       { label: "Careers", href: "/careers" },
       { label: "Blog", href: "/blog" },
       { label: "Press", href: "/press" },

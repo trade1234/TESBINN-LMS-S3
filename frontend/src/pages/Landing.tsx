@@ -406,6 +406,61 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* Company Pages */}
+      <section className="py-12 bg-card">
+        <div className="container-wide section-padding">
+          <div className="flex items-center justify-between gap-4 mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-foreground">Company</h2>
+              <p className="text-sm text-muted-foreground">
+                Learn more about TESBINN, our mission, and how we grow.
+              </p>
+            </div>
+            <Button variant="outline" asChild>
+              <Link to="/about">About TESBINN</Link>
+            </Button>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-5">
+            <Link
+              to="/about"
+              className="rounded-lg border border-border bg-background p-4 hover:border-primary/50 hover:shadow-md transition-all"
+            >
+              <p className="font-semibold text-foreground">About</p>
+              <p className="text-xs text-muted-foreground mt-2">Mission, vision, and impact.</p>
+            </Link>
+            <Link
+              to="/tesbinn"
+              className="rounded-lg border border-border bg-background p-4 hover:border-primary/50 hover:shadow-md transition-all"
+            >
+              <p className="font-semibold text-foreground">TESBINN</p>
+              <p className="text-xs text-muted-foreground mt-2">Platform capabilities.</p>
+            </Link>
+            <Link
+              to="/careers"
+              className="rounded-lg border border-border bg-background p-4 hover:border-primary/50 hover:shadow-md transition-all"
+            >
+              <p className="font-semibold text-foreground">Careers</p>
+              <p className="text-xs text-muted-foreground mt-2">Join the team.</p>
+            </Link>
+            <Link
+              to="/blog"
+              className="rounded-lg border border-border bg-background p-4 hover:border-primary/50 hover:shadow-md transition-all"
+            >
+              <p className="font-semibold text-foreground">Blog</p>
+              <p className="text-xs text-muted-foreground mt-2">Insights and updates.</p>
+            </Link>
+            <Link
+              to="/press"
+              className="rounded-lg border border-border bg-background p-4 hover:border-primary/50 hover:shadow-md transition-all"
+            >
+              <p className="font-semibold text-foreground">Press</p>
+              <p className="text-xs text-muted-foreground mt-2">Media resources.</p>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Adverts Section */}
       <section className="py-8 bg-muted/50">
         <div className="container-wide section-padding">
