@@ -27,6 +27,7 @@ const adverts = require('./routes/adverts');
 const schedules = require('./routes/schedules');
 const notifications = require('./routes/notifications');
 const announcements = require('./routes/announcements');
+const dashboard = require('./routes/dashboard');
 
 const app = express();
 
@@ -86,6 +87,7 @@ app.use('/api/v1/adverts', adverts);
 app.use('/api/v1/schedules', schedules);
 app.use('/api/v1/notifications', notifications);
 app.use('/api/v1/announcements', announcements);
+app.use('/api/v1/dashboard', dashboard);
 
 app.use(errorHandler);
 

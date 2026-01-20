@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { BookOpen, Clock, Trophy, TrendingUp, ArrowRight } from "lucide-react";
+import { Activity, BookOpen, PlayCircle, Trophy, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import StatsCard from "@/components/dashboard/StatsCard";
@@ -10,7 +10,12 @@ import CourseCard from "@/components/courses/CourseCard";
 import { api } from "@/lib/api";
 import { authStorage } from "@/lib/auth";
 import { minutesToDurationLabel } from "@/lib/format";
-import type { ApiResponse, Enrollment, MeResponse } from "@/lib/types";
+import type {
+  ApiResponse,
+  Enrollment,
+  MeResponse,
+  StudentDashboardData,
+} from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 
 const StudentDashboard = () => {
@@ -19,6 +24,7 @@ const StudentDashboard = () => {
 
   const [me, setMe] = useState<MeResponse["data"] | null>(null);
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
+  const [dashboard, setDashboard] = useState<StudentDashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -33,14 +39,16 @@ const StudentDashboard = () => {
 
       setIsLoading(true);
       try {
-        const [meRes, enrollRes] = await Promise.all([
+        const [meRes, enrollRes, dashboardRes] = await Promise.all([
           api.get<MeResponse>("/auth/me"),
           api.get<ApiResponse<Enrollment[]>>("/enrollments/me"),
+          api.get<ApiResponse<StudentDashboardData>>("/dashboard/student"),
         ]);
 
         if (!active) return;
         setMe(meRes.data.data);
         setEnrollments(enrollRes.data.data);
+        setDashboard(dashboardRes.data.data);
       } catch (err: any) {
         if (!active) return;
         const status = err?.response?.status;
@@ -78,18 +86,14 @@ const StudentDashboard = () => {
     );
     const enrolledCoursesCount = approvedEnrollments.length;
     const completedCoursesCount = approvedEnrollments.filter((e) => e.completionStatus === "completed").length;
-    const hoursLearned = approvedEnrollments.reduce((sum, e) => {
-      const minutes = e.course?.duration || 0;
-      const pct = typeof e.percentComplete === "number" ? e.percentComplete : 0;
-      return sum + (minutes * pct) / 100;
-    }, 0);
 
     return {
       enrolledCoursesCount,
       completedCoursesCount,
-      hoursLearned: (hoursLearned / 60).toFixed(1),
+      lessonsCompletedThisWeek: dashboard?.stats.lessonsCompletedThisWeek ?? 0,
+      activityThisWeek: dashboard?.stats.activityThisWeek ?? 0,
     };
-  }, [enrollments]);
+  }, [dashboard, enrollments]);
 
   const continueLearningCards = useMemo(() => {
     const labelByCategory: Record<string, string> = {
@@ -166,14 +170,6 @@ const StudentDashboard = () => {
             iconColor="primary"
           />
           <StatsCard
-            title="Hours Learned"
-            value={stats.hoursLearned}
-            change={isLoading ? "Loading..." : ""}
-            changeType="neutral"
-            icon={Clock}
-            iconColor="secondary"
-          />
-          <StatsCard
             title="Completed Courses"
             value={stats.completedCoursesCount}
             change={isLoading ? "Loading..." : ""}
@@ -182,11 +178,19 @@ const StudentDashboard = () => {
             iconColor="warning"
           />
           <StatsCard
-            title="Current Streak"
-            value="7 days"
-            change="Personal best!"
-            changeType="positive"
-            icon={TrendingUp}
+            title="Lessons This Week"
+            value={stats.lessonsCompletedThisWeek}
+            change={isLoading ? "Loading..." : ""}
+            changeType="neutral"
+            icon={PlayCircle}
+            iconColor="secondary"
+          />
+          <StatsCard
+            title="Activity This Week"
+            value={stats.activityThisWeek}
+            change={isLoading ? "Loading..." : ""}
+            changeType="neutral"
+            icon={Activity}
             iconColor="success"
           />
         </div>
@@ -194,10 +198,10 @@ const StudentDashboard = () => {
         {/* Charts and Activity */}
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <ProgressChart />
+            <ProgressChart data={dashboard?.weeklyProgress} />
           </div>
           <div>
-            <RecentActivity />
+            <RecentActivity activities={dashboard?.recentActivity} isLoading={isLoading} />
           </div>
         </div>
 

@@ -1,16 +1,13 @@
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import type { StudentDashboardProgressPoint } from "@/lib/types";
 
-const data = [
-  { name: "Mon", lessons: 4, hours: 2.5 },
-  { name: "Tue", lessons: 3, hours: 1.8 },
-  { name: "Wed", lessons: 6, hours: 3.2 },
-  { name: "Thu", lessons: 2, hours: 1.2 },
-  { name: "Fri", lessons: 5, hours: 2.8 },
-  { name: "Sat", lessons: 8, hours: 4.5 },
-  { name: "Sun", lessons: 4, hours: 2.1 },
-];
+const fallbackData: StudentDashboardProgressPoint[] = [];
 
-const ProgressChart = () => {
+interface ProgressChartProps {
+  data?: StudentDashboardProgressPoint[];
+}
+
+const ProgressChart = ({ data = fallbackData }: ProgressChartProps) => {
   return (
     <div className="glass-card rounded-xl p-5">
       <div className="flex items-center justify-between mb-6">

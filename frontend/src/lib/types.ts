@@ -249,3 +249,27 @@ export interface Certificate {
   issuedAt: string;
   templateSnapshot?: Course["certificateTemplate"];
 }
+
+export interface StudentDashboardActivity {
+  id: string;
+  type: "enrolled" | "completed" | "lesson" | "achievement";
+  title: string;
+  description: string;
+  createdAt: string;
+}
+
+export interface StudentDashboardProgressPoint {
+  name: string;
+  lessons: number;
+  hours: number;
+  date?: string;
+}
+
+export interface StudentDashboardData {
+  stats: {
+    lessonsCompletedThisWeek: number;
+    activityThisWeek: number;
+  };
+  weeklyProgress: StudentDashboardProgressPoint[];
+  recentActivity: StudentDashboardActivity[];
+}
