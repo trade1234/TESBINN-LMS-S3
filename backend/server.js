@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 const morgan = require('morgan');
 const colors = require('colors');
 const cors = require('cors');
+const mongoSanitize = require('express-mongo-sanitize');
 const path = require('path');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/error');
@@ -35,6 +36,11 @@ const app = express();
 
 // Body parser
 app.use(express.json());
+app.use(
+  mongoSanitize({
+    replaceWith: '_',
+  })
+);
 
 // Enable CORS
 const defaultOrigins = ["https://tesbinn-lms-frontend.vercel.app", "http://localhost:8081", "http://172.16.0.2:8081"];
