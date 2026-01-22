@@ -39,16 +39,43 @@ const StudentDashboard = () => {
 
       setIsLoading(true);
       try {
-        const [meRes, enrollRes, dashboardRes] = await Promise.all([
+        const [meRes, enrollRes] = await Promise.all([
           api.get<MeResponse>("/auth/me"),
           api.get<ApiResponse<Enrollment[]>>("/enrollments/me"),
-          api.get<ApiResponse<StudentDashboardData>>("/dashboard/student"),
         ]);
 
         if (!active) return;
         setMe(meRes.data.data);
         setEnrollments(enrollRes.data.data);
-        setDashboard(dashboardRes.data.data);
+
+        try {
+          const dashboardRes = await api.get<ApiResponse<StudentDashboardData>>(
+            "/dashboard/student"
+          );
+          if (!active) return;
+          setDashboard(dashboardRes.data.data);
+        } catch (err: any) {
+          if (!active) return;
+          const status = err?.response?.status;
+          const message =
+            err?.response?.data?.error ||
+            err?.response?.data?.message ||
+            "Failed to load dashboard.";
+
+          if (status === 401) {
+            authStorage.clearAll();
+            navigate("/login");
+            return;
+          }
+
+          if (status !== 404) {
+            toast({
+              title: "Dashboard error",
+              description: message,
+              variant: "destructive",
+            });
+          }
+        }
       } catch (err: any) {
         if (!active) return;
         const status = err?.response?.status;
