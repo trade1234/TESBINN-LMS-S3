@@ -47,17 +47,30 @@ const defaultOrigins = [
   'http://localhost:8081',
   'http://172.16.0.2:8081',
 ];
-const allowedOriginsString =
-  process.env.ALLOWED_ORIGINS || process.env.FRONTEND_URL || defaultOrigins.join(',');
+const envOrigins = [process.env.ALLOWED_ORIGINS, process.env.FRONTEND_URL].filter(Boolean);
+const allowedOriginsString = [defaultOrigins.join(','), ...envOrigins].join(',');
+const normalizeOrigin = (value) => {
+  if (!value) return '';
+  try {
+    return new URL(value).origin;
+  } catch {
+    return value.trim();
+  }
+};
 const allowedOrigins = allowedOriginsString
   .split(',')
-  .map((origin) => origin.trim())
+  .map((origin) => normalizeOrigin(origin))
   .filter(Boolean);
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+      const normalizedOrigin = normalizeOrigin(origin);
+      if (allowedOrigins.includes(normalizedOrigin)) {
         callback(null, true);
         return;
       }
