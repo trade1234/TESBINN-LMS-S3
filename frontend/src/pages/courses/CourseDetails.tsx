@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, BookOpen, Users, Clock, Layers } from "lucide-react";
 import Header from "@/components/layout/Header";
@@ -22,7 +22,6 @@ const CourseDetails = () => {
   const [isEnrolling, setIsEnrolling] = useState(false);
   const [myEnrollment, setMyEnrollment] = useState<Enrollment | null>(null);
   const [isCheckingEnrollment, setIsCheckingEnrollment] = useState(false);
-  const modulesRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -232,74 +231,16 @@ const CourseDetails = () => {
                     )}
                   </div>
                 </div>
-
-                <div className="mt-8" ref={modulesRef}>
-                  <h2 className="text-xl font-semibold mb-4">Course content</h2>
-
-                  {course.modules && course.modules.length > 0 ? (
-                    <div className="space-y-4">
-                      {course.modules
-                        .slice()
-                        .sort((a, b) => a.order - b.order)
-                        .map((m) => (
-                          <div key={m._id} className="glass-card rounded-xl p-5">
-                            <div className="flex items-center justify-between gap-4">
-                              <div>
-                                <p className="font-medium">{m.title}</p>
-                                {m.description ? (
-                                  <p className="text-sm text-muted-foreground mt-1">{m.description}</p>
-                                ) : null}
-                              </div>
-                              <Badge variant="outline">{(m.lessons || []).length} lessons</Badge>
-                            </div>
-
-                            {(m.lessons || []).length > 0 ? (
-                              <div className="mt-4 space-y-2">
-                                {m.lessons
-                                  .slice()
-                                  .sort((a, b) => a.order - b.order)
-                                  .map((l) => (
-                                    <div
-                                      key={l._id}
-                                      className="flex items-center justify-between text-sm rounded-lg border border-border p-3"
-                                    >
-                                      <div className="min-w-0">
-                                        <p className="font-medium truncate">{l.title}</p>
-                                        <p className="text-muted-foreground">
-                                          {l.lessonType.toUpperCase()}
-                                          {l.isFree ? " • Free" : ""}
-                                        </p>
-                                      </div>
-                                      <span className="text-muted-foreground">
-                                        {l.duration ? `${l.duration}m` : ""}
-                                      </span>
-                                    </div>
-                                  ))}
-                              </div>
-                            ) : null}
-                          </div>
-                        ))}
-                    </div>
-                  ) : (
-                    <p className="text-muted-foreground">No modules added yet.</p>
-                  )}
-                </div>
               </div>
 
               <aside className="lg:col-span-1">
                   <div className="glass-card rounded-xl p-6 lg:sticky lg:top-28">
-                    <h3 className="text-lg font-semibold mb-2">
-                      {myEnrollment?.approvalStatus === "pending"
-                        ? "Enrollment pending"
-                        : myEnrollment
-                          ? "Continue learning"
-                          : "Ready to start?"}
-                    </h3>
+                    <h3 className="text-lg font-semibold mb-2">Ready to start?</h3>
                     <p className="text-sm text-muted-foreground mb-5">
                       {myEnrollment?.approvalStatus === "pending"
                         ? "An admin needs to approve your enrollment before you can access lessons."
                         : myEnrollment
-                          ? "You are enrolled. Resume from the module list below."
+                          ? "You are enrolled. Jump back into your course whenever you're ready."
                           : "Enroll to track progress and access all lessons."}
                     </p>
 
@@ -309,7 +250,7 @@ const CourseDetails = () => {
                       className="w-full"
                       onClick={
                         myEnrollment?.approvalStatus === "approved"
-                          ? () => modulesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+                          ? () => navigate(`/student/courses/${course._id}`)
                           : handleEnroll
                       }
                       disabled={
@@ -353,3 +294,5 @@ const CourseDetails = () => {
 };
 
 export default CourseDetails;
+
+
