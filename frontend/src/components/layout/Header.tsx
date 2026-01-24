@@ -141,7 +141,7 @@ const Header = () => {
             size="icon"
             className={cn(
               "lg:hidden",
-              isTransparent && "text-primary-foreground hover:bg-primary-foreground/10"
+              isTransparent && "text-[hsl(24,95%,45%)] hover:bg-primary-foreground/10"
             )}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
