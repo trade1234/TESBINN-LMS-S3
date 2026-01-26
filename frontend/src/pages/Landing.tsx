@@ -382,9 +382,11 @@ const Landing = () => {
               <span>Get Job Alerts & Free Updates</span>
             </div>
           </div>
-          <Button className="bg-secondary hover:bg-secondary/90 text-primary-foreground px-8">
-            SMS ON 9295 
-            <ChevronDown className="ml-2 h-4 w-4" />
+          <Button className="bg-secondary hover:bg-secondary/90 text-primary-foreground px-8" asChild>
+            <a href="sms:9295?body=OK">
+              SMS ON 9295 
+              <ChevronDown className="ml-2 h-4 w-4" />
+            </a>
           </Button>
         </div>
       </section>

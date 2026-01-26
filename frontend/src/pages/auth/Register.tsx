@@ -17,6 +17,7 @@ type UserRole = "student" | "teacher";
 const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -48,12 +49,24 @@ const Register = () => {
     setIsLoading(true);
 
     try {
-      const res = await api.post<LoginResponse>("/auth/register", {
+      const payload: {
+        name: string;
+        email: string;
+        password: string;
+        role: UserRole;
+        phone?: string;
+      } = {
         name,
         email,
         password,
         role,
-      });
+      };
+
+      if (role === "student" && phone.trim()) {
+        payload.phone = phone.trim();
+      }
+
+      const res = await api.post<LoginResponse>("/auth/register", payload);
 
       if (role === "teacher") {
         // Teacher accounts require admin approval; don't keep token locally.
@@ -233,6 +246,21 @@ const Register = () => {
                 className="h-12"
               />
             </div>
+
+            {role === "student" && (
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone number</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="(555) 555-5555"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="h-12"
+                  autoComplete="tel"
+                />
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
