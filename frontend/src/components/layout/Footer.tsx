@@ -28,9 +28,9 @@ const Footer = () => {
   };
 
   const socialLinks = [
-    { icon: Facebook, href: "#", label: "Facebook" },
-    { icon: Twitter, href: "#", label: "Twitter" },
-    { icon: Linkedin, href: "#", label: "LinkedIn" },
+    { icon: Facebook, href: "https://www.facebook.com/tradeethiopian?mibextid=vk8aRt", label: "Facebook" },
+    { icon: Twitter, href: "https://x.com/trade_ethiopia?t=3-KMZLyDiH52mkoOExg1ag&s=09", label: "Twitter" },
+    { icon: Linkedin, href: "https://www.linkedin.com/company/tradeethiopia/", label: "LinkedIn" },
     { icon: Youtube, href: "#", label: "YouTube" },
   ];
 
