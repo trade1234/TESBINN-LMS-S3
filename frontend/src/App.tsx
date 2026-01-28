@@ -43,6 +43,7 @@ import AdminAnnouncements from "./pages/admin/Announcements";
 import AdminCertificates from "./pages/admin/Certificates";
 import AdminSchedules from "./pages/admin/Schedules";
 import AdminBlog from "./pages/admin/Blog";
+import AdminEnrolledStudents from "./pages/admin/EnrolledStudents";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -104,6 +105,7 @@ const App = () => (
           <Route path="/admin/analytics" element={<AdminAnalytics />} />
           <Route path="/admin/certificates" element={<AdminCertificates />} />
           <Route path="/admin/schedules" element={<AdminSchedules />} />
+          <Route path="/admin/enrolled-students" element={<AdminEnrolledStudents />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
 
           {/* 404 */}

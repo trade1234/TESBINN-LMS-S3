@@ -74,6 +74,7 @@ const adminNav: NavItem[] = [
   { icon: Users, label: "Users", href: "/admin/users" },
   { icon: UserCheck, label: "Teacher Approvals", href: "/admin/approvals" },
   { icon: BookOpen, label: "Courses", href: "/admin/courses" },
+  { icon: Users, label: "Enrolled Students", href: "/admin/enrolled-students" },
   { icon: GraduationCap, label: "Certificates", href: "/admin/certificates" },
   { icon: FolderOpen, label: "Categories", href: "/admin/categories" },
   { icon: Megaphone, label: "Adverts", href: "/admin/adverts" },

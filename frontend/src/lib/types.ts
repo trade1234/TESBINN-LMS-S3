@@ -222,6 +222,12 @@ export interface Course {
 export interface Enrollment {
   _id: string;
   course: Course;
+  student?: {
+    _id?: string;
+    name?: string;
+    email?: string;
+    status?: string;
+  };
   percentComplete: number;
   completionStatus: "not_started" | "in_progress" | "completed";
   approvalStatus?: "pending" | "approved" | "rejected";
