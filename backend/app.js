@@ -43,9 +43,13 @@ app.use(
 
 // Enable CORS
 const defaultOrigins = [
+  'https://tesbinn.com',   
+  'https://www.tesbinn.com',
+  'http://tesbinn.com',       
   'https://tesbinn-lms-frontend.vercel.app',
-  'http://localhost:8081',
+  'http://localhost:8081',                
   'http://172.16.0.2:8081',
+  'http://44.209.130.119',
 ];
 const envOrigins = [process.env.ALLOWED_ORIGINS, process.env.FRONTEND_URL].filter(Boolean);
 const allowedOriginsString = [defaultOrigins.join(','), ...envOrigins].join(',');
