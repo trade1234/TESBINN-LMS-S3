@@ -8,6 +8,7 @@ import ScrollToTop from "./components/layout/ScrollToTop";
 // Pages
 import Landing from "./pages/Landing";
 import SchedulePage from "./pages/Schedule";
+import VideosPage from "./pages/Videos";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import ForgotPassword from "./pages/auth/ForgotPassword";
@@ -64,6 +65,7 @@ const App = () => (
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/courses" element={<CourseCatalog />} />
           <Route path="/schedule" element={<SchedulePage />} />
+          <Route path="/videos" element={<VideosPage />} />
           <Route path="/course/:id" element={<CourseDetails />} />
           <Route path="/support" element={<Support />} />
           <Route path="/help" element={<Support />} />
