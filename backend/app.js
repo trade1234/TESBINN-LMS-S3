@@ -25,6 +25,7 @@ const files = require('./routes/files');
 const certificates = require('./routes/certificates');
 const adverts = require('./routes/adverts');
 const schedules = require('./routes/schedules');
+const payments = require('./routes/payments');
 const notifications = require('./routes/notifications');
 const announcements = require('./routes/announcements');
 const dashboard = require('./routes/dashboard');
@@ -46,6 +47,7 @@ const defaultOrigins = [
   'https://tesbinn-lms-frontend.vercel.app',
   'http://localhost:8081',
   'http://172.16.0.2:8081',
+  'http://13.222.168.70/api/v1/payments/telebirr/create-order'
 ];
 const envOrigins = [process.env.ALLOWED_ORIGINS, process.env.FRONTEND_URL].filter(Boolean);
 const allowedOriginsString = [defaultOrigins.join(','), ...envOrigins].join(',');
@@ -112,6 +114,7 @@ app.use('/api/v1/files', files);
 app.use('/api/v1/certificates', certificates);
 app.use('/api/v1/adverts', adverts);
 app.use('/api/v1/schedules', schedules);
+app.use('/api/v1/payments', payments);
 app.use('/api/v1/notifications', notifications);
 app.use('/api/v1/announcements', announcements);
 app.use('/api/v1/dashboard', dashboard);

@@ -77,6 +77,19 @@ const EnrollmentSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    merchOrderId: {
+      type: String,
+      trim: true,
+    },
+    paymentOrderId: {
+      type: String,
+      trim: true,
+    },
+    paymentStatus: {
+      type: String,
+      enum: ['pending', 'paid', 'failed'],
+      default: 'pending',
+    },
     rating: {
       type: Number,
       min: 1,

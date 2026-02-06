@@ -137,3 +137,4 @@ File uploads for course materials are planned.# TESBINN-LMS
 # TESBINN-LMS-S3
 # TESBINN-LMS-S3
 # TESBINN-LMS-S3
+# TESBINN-LMS-TeleBirr

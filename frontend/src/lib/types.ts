@@ -236,6 +236,7 @@ export interface Enrollment {
   rating?: number;
   review?: string;
   ratedAt?: string;
+  paymentStatus?: "pending" | "paid" | "failed";
   enrolledAt: string;
   completedAt?: string;
   completedQuizzes?: Array<{

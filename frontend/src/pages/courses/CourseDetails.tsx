@@ -115,27 +115,8 @@ const CourseDetails = () => {
     if (!course?._id) return;
 
     setIsEnrolling(true);
-    try {
-      const res = await api.post<ApiResponse<Enrollment>>("/enrollments", { courseId: course._id });
-      setMyEnrollment(res.data.data);
-      toast({
-        title: "Enrollment request submitted",
-        description: "Your enrollment is pending admin approval.",
-      });
-    } catch (err: any) {
-      const message =
-        err?.response?.data?.error ||
-        err?.response?.data?.message ||
-        "Enrollment failed.";
-
-      toast({
-        title: "Enrollment failed",
-        description: message,
-        variant: "destructive",
-      });
-    } finally {
-      setIsEnrolling(false);
-    }
+    navigate(`/checkout/${course._id}`);
+    setIsEnrolling(false);
   };
 
   const categoryLabel = (cat?: string) => {

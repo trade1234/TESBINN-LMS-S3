@@ -14,6 +14,8 @@ import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
 import CourseCatalog from "./pages/courses/CourseCatalog";
 import CourseDetails from "./pages/courses/CourseDetails";
+import Checkout from "./pages/payments/Checkout";
+import PaymentReturn from "./pages/payments/PaymentReturn";
 import Support from "./pages/Support";
 import About from "./pages/company/About";
 import Tesbinn from "./pages/company/Tesbinn";
@@ -65,6 +67,8 @@ const App = () => (
           <Route path="/courses" element={<CourseCatalog />} />
           <Route path="/schedule" element={<SchedulePage />} />
           <Route path="/course/:id" element={<CourseDetails />} />
+          <Route path="/checkout/:courseId" element={<Checkout />} />
+          <Route path="/payment/return" element={<PaymentReturn />} />
           <Route path="/support" element={<Support />} />
           <Route path="/help" element={<Support />} />
           <Route path="/about" element={<About />} />
