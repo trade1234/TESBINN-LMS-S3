@@ -31,6 +31,7 @@ const announcements = require('./routes/announcements');
 const dashboard = require('./routes/dashboard');
 const analytics = require('./routes/analytics');
 const blog = require('./routes/blog');
+const youtube = require('./routes/youtube');
 
 const app = express();
 
@@ -44,9 +45,13 @@ app.use(
 
 // Enable CORS
 const defaultOrigins = [
+  'https://tesbinn.com',   
+  'https://www.tesbinn.com',
+  'http://tesbinn.com',       
   'https://tesbinn-lms-frontend.vercel.app',
-  'http://localhost:8081',
+  'http://localhost:8081',                
   'http://172.16.0.2:8081',
+  'http://44.209.130.119',
   'http://13.222.168.70/api/v1/payments/telebirr/create-order'
 ];
 const envOrigins = [process.env.ALLOWED_ORIGINS, process.env.FRONTEND_URL].filter(Boolean);
@@ -120,6 +125,7 @@ app.use('/api/v1/announcements', announcements);
 app.use('/api/v1/dashboard', dashboard);
 app.use('/api/v1/analytics', analytics);
 app.use('/api/v1/blog', blog);
+app.use('/api/v1/youtube', youtube);
 
 app.use(errorHandler);
 
