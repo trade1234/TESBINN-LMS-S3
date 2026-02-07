@@ -10,9 +10,6 @@ const errorHandler = require('./middleware/error');
 // Load env vars (local/dev)
 dotenv.config({ path: './.env' });
 
-// Connect to database
-connectDB();
-
 // Route files
 const auth = require('./routes/auth');
 const users = require('./routes/users');
@@ -86,6 +83,31 @@ app.use(
     credentials: true,
   })
 );
+
+// Serverless-safe DB connection:
+// On Vercel, if you connect at module load and it fails, the function crashes
+// before CORS headers get set. This middleware ensures CORS runs first and DB
+// connection errors become a normal JSON 500 response.
+app.use(async (req, res, next) => {
+  // Allow basic health checks without DB.
+  if (req.path === '/api/v1/health' || req.path === '/health') {
+    next();
+    return;
+  }
+
+  // Only connect for API routes.
+  if (!req.path.startsWith('/api/')) {
+    next();
+    return;
+  }
+
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
 
 // Dev logging middleware
 if (process.env.NODE_ENV === 'development') {
